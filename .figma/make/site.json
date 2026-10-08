@@ -1,0 +1,10 @@
+{
+  "description": "Generate customized city report PDFs with logo upload, background textures, and live preview through an intuitive, responsive dashboard interface.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
