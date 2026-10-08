@@ -1,0 +1,300 @@
+/* Pauta de conversas — estilo cartaz (vermelho amassado, amarelo, Rubik Black) */
+
+@font-face { font-family: "Rubik"; font-weight: 400; src: url("fonts/rubik-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Rubik"; font-weight: 500; src: url("fonts/rubik-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Rubik"; font-weight: 700; src: url("fonts/rubik-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Rubik"; font-weight: 800; src: url("fonts/rubik-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Rubik"; font-weight: 900; src: url("fonts/rubik-latin-900-normal.woff2") format("woff2"); }
+
+:root {
+  --vermelho: #9d1609;      /* fundo do cartaz */
+  --vermelho-tinta: #b3170b; /* vermelho para texto/marcas sobre o papel */
+  --amarelo: #fcd401;       /* título do cartaz */
+  --amarelo-escuro: #c99800; /* amarelo legível sobre papel claro */
+  --papel: #f7f1e6;
+  --papel-2: #efe5d4;
+  --tinta: #1e1412;
+  --tinta-2: #5c4f49;
+  --linha: #dccfbb;
+  --flavio: #3b3530;
+  --outros: #cfc6be;
+  --textura: url("textura-vermelha.jpg");
+}
+
+@page {
+  size: A4;
+  margin: 15mm 14mm 17mm 14mm;
+  background: transparent;
+  @bottom-left {
+    content: var(--rodape, "");
+    font: 700 7.5pt "Rubik", sans-serif; letter-spacing: .08em;
+    color: var(--vermelho-tinta); text-transform: uppercase;
+  }
+  @bottom-right {
+    content: counter(page);
+    font: 900 9pt "Rubik", sans-serif; color: var(--vermelho-tinta);
+  }
+}
+/* capa sem margem. Vai em dois seletores: versões novas do Chromium nem sempre aplicam a
+   margem da página nomeada (capa) e encolhem a capa inteira para caber; :first sempre vale. */
+@page :first {
+  margin: 0;
+  background: #9d1609;
+  @bottom-left { content: none; }
+  @bottom-right { content: none; }
+}
+@page capa {
+  margin: 0;
+  background: #9d1609;
+  @bottom-left { content: none; }
+  @bottom-right { content: none; }
+}
+
+* { box-sizing: border-box; }
+/* fundo transparente: o render_pauta_pdf.py coloca o papel amassado (textura-papel.jpg)
+   por baixo de cada página interna depois de gerar o PDF */
+html { background: transparent; }
+body {
+  margin: 0; color: var(--tinta);
+  font: 400 9.6pt/1.42 "Rubik", sans-serif;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+h1, h2, h3, h4 { margin: 0; font-weight: 900; line-height: .95; }
+p { margin: 0 0 .5em; }
+.num { font-variant-numeric: tabular-nums; }
+.miudo { font-size: 7.6pt; color: var(--tinta-2); }
+
+/* ---------- capa ---------- */
+.capa {
+  page: capa;
+  width: 210mm; height: 297mm; overflow: hidden; padding: 20mm 18mm 16mm;
+  background: var(--vermelho) var(--textura) center / cover no-repeat;
+  color: #fff; display: flex; flex-direction: column;
+  break-after: page;
+}
+.capa-topo { display: flex; justify-content: space-between; align-items: flex-start; }
+.capa .logo { width: 52mm; height: auto; margin: -6mm -4mm 0 0; }
+.capa .selo {
+  align-self: flex-start;
+  font: 900 11pt "Rubik"; letter-spacing: .06em; text-transform: uppercase;
+  border: 2.5px solid #fff; padding: 2.2mm 3.6mm 1.8mm;
+}
+.capa .titulo {
+  margin-top: 6mm;
+  font: 900 64pt/.86 "Rubik"; color: var(--amarelo);
+  text-transform: uppercase; letter-spacing: -.01em;
+}
+.capa .cidade {
+  margin-top: 9mm;
+  font: 900 46pt/.9 "Rubik"; text-transform: uppercase;
+}
+.capa .cidade small { display: block; font-size: 22pt; margin-top: 2mm; }
+.capa .classe {
+  margin-top: 11mm; align-self: flex-start;
+  background: var(--amarelo); color: var(--vermelho);
+  font: 900 20pt "Rubik"; text-transform: uppercase;
+  padding: 2.6mm 5mm 1.8mm; transform: rotate(-1.5deg);
+}
+.capa .explica { margin-top: 7mm; max-width: 150mm; font: 500 12.5pt/1.4 "Rubik"; }
+.capa .placar {
+  margin-top: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm;
+  border-top: 2.5px solid #fff; padding-top: 6mm;
+}
+.capa .placar b { display: block; font: 900 30pt/1 "Rubik"; }
+.capa .placar span { font: 700 9pt "Rubik"; text-transform: uppercase; letter-spacing: .06em; }
+.capa .placar .lula b { color: var(--amarelo); }
+.capa .rodape-capa { margin-top: 6mm; font: 400 7.6pt/1.4 "Rubik"; opacity: .85; }
+
+/* ---------- faixa de seção ---------- */
+.secao { break-before: page; }
+.faixa {
+  background: var(--vermelho) var(--textura) center / cover;
+  color: #fff; padding: 6mm 7mm 5.4mm; margin-bottom: 6mm;
+}
+.faixa .kicker { font: 700 8pt "Rubik"; letter-spacing: .12em; text-transform: uppercase; opacity: .9; }
+.faixa h2 { margin-top: 1.6mm; font-size: 30pt; color: var(--amarelo); text-transform: uppercase; }
+.faixa p { margin: 2.4mm 0 0; font: 500 10pt/1.4 "Rubik"; max-width: 160mm; }
+
+h3 {
+  font-size: 13pt; text-transform: uppercase; color: var(--vermelho-tinta);
+  margin: 7mm 0 3mm; letter-spacing: .01em;
+}
+.faixa + h3, .faixa + .bloco > h3:first-child { margin-top: 0; }
+.bloco { break-inside: avoid; }
+
+/* ---------- matriz de números ---------- */
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.4mm; }
+.kpi { background: #fff; border-top: 3px solid var(--tinta); padding: 3mm 3.2mm 2.8mm; }
+.kpi .rot { font: 700 7.2pt "Rubik"; text-transform: uppercase; letter-spacing: .07em; color: var(--tinta-2); }
+.kpi .val { font: 900 19pt/1.05 "Rubik"; margin-top: 1.2mm; }
+.kpi .sub { font-size: 7.8pt; color: var(--tinta-2); margin-top: .6mm; }
+.kpi.destaque { background: var(--vermelho) var(--textura) center / cover; border-top-color: var(--amarelo); color: #fff; }
+.kpi.destaque .rot, .kpi.destaque .sub { color: #fff; opacity: .9; }
+.kpi.destaque .val { color: var(--amarelo); }
+
+/* ---------- barras ---------- */
+.barras { display: grid; grid-template-columns: 44mm 1fr 30mm; gap: 1.3mm 3mm; align-items: center; }
+.barras .nome { font-weight: 700; font-size: 8.8pt; line-height: 1.15; }
+.barras .nome small { font-weight: 400; color: var(--tinta-2); }
+.barras .trilho { height: 4.2mm; position: relative; }
+.barras .barra { height: 100%; border-radius: 0 3px 3px 0; min-width: 1px; }
+.barras .valor { font-size: 8.6pt; text-align: right; }
+.barras .valor b { font-weight: 800; }
+.c-lula { background: var(--vermelho-tinta); }
+.c-flavio { background: var(--flavio); }
+.c-ponte { background: var(--amarelo-escuro); }
+.c-outros { background: var(--outros); }
+.legenda { display: flex; gap: 5mm; flex-wrap: wrap; font-size: 7.8pt; color: var(--tinta-2); margin-top: 2.6mm; }
+.legenda i { display: inline-block; width: 3mm; height: 3mm; vertical-align: -.4mm; margin-right: 1.2mm; border-radius: 1px; }
+
+/* ---------- cartão vermelho de destaque ---------- */
+.cartaz {
+  background: var(--vermelho) var(--textura) center / cover; color: #fff;
+  padding: 5.5mm 6mm; margin-top: 6mm; break-inside: avoid;
+}
+.cartaz .grande { font: 900 17pt/1.12 "Rubik"; }
+.cartaz .grande em { font-style: normal; color: var(--amarelo); }
+.cartaz .linha { display: flex; gap: 8mm; margin-top: 4mm; align-items: flex-end; }
+.cartaz .linha b { display: block; font: 900 22pt/1 "Rubik"; color: var(--amarelo); }
+.cartaz .linha span { font: 700 7.5pt "Rubik"; text-transform: uppercase; letter-spacing: .06em; }
+.cartaz .seta { font: 900 22pt/1 "Rubik"; }
+.cartaz .nota { font-size: 7.6pt; opacity: .85; margin-top: 3.5mm; }
+
+/* ---------- a conta ---------- */
+.conta-topo { display: grid; grid-template-columns: 1.25fr 1fr; gap: 5mm; align-items: stretch; }
+.lider { background: #fff; padding: 5mm; border-left: 5px solid var(--vermelho-tinta); }
+.lider .grande { font: 900 15pt/1.15 "Rubik"; }
+.lider .grande em { font-style: normal; color: var(--vermelho-tinta); }
+.metade { background: var(--amarelo); padding: 5mm; text-align: center; }
+.metade b { display: block; font: 900 34pt/1 "Rubik"; color: var(--vermelho); }
+.metade span { font: 800 8.5pt/1.25 "Rubik"; text-transform: uppercase; color: var(--vermelho); }
+.bolsoes { margin-top: 5mm; margin-bottom: 4mm; }
+.bolsao { display: grid; grid-template-columns: 38mm 1fr 25mm; gap: 3mm; align-items: center; padding: 2.4mm 0; border-bottom: 1px solid var(--linha); }
+.bolsao .nome { font-weight: 800; text-transform: uppercase; font-size: 8.6pt; }
+.bolsao .nome small { display: block; font-weight: 400; text-transform: none; color: var(--tinta-2); font-size: 7.6pt; }
+.bolsao .trilho { position: relative; height: 6mm; }
+.bolsao .barra { height: 100%; background: var(--vermelho-tinta); border-radius: 0 3px 3px 0; }
+.bolsao .marca-metade { position: absolute; top: -1mm; bottom: -1mm; width: 0; border-left: 2px dashed var(--tinta); }
+.bolsao .mult { text-align: right; }
+.bolsao .mult b { font: 900 14pt/1 "Rubik"; color: var(--vermelho-tinta); }
+.bolsao .mult span { display: block; font-size: 7.4pt; color: var(--tinta-2); }
+.chips { display: flex; flex-wrap: wrap; gap: 1.4mm; margin-top: 1.2mm; }
+.chip { font: 700 7.4pt "Rubik"; padding: .9mm 2mm .7mm; background: var(--papel-2); border-radius: 2px; white-space: nowrap; }
+.chip.amarelo { background: var(--amarelo); color: var(--vermelho); }
+.chip.vermelho { background: var(--vermelho-tinta); color: #fff; }
+.chip.escuro { background: var(--flavio); color: #fff; }
+.chip.contorno { background: transparent; border: 1px solid var(--tinta-2); }
+
+/* ---------- perfil ---------- */
+.perfil { display: grid; grid-template-columns: 52mm 1fr; gap: 6mm; margin-top: 2mm; }
+.perfil .resumo b { display: block; font: 900 26pt/1 "Rubik"; color: var(--vermelho-tinta); }
+.perfil .resumo span { font: 700 7.6pt "Rubik"; text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-2); }
+.perfil .resumo div + div { margin-top: 4mm; }
+.seg { display: grid; grid-template-columns: 40mm 1fr 42mm; gap: 3mm; align-items: center; padding: 1.6mm 0; border-bottom: 1px solid var(--linha); }
+.seg .trilho { height: 4mm; background: var(--papel-2); border-radius: 2px; overflow: hidden; }
+.seg .barra { height: 100%; background: var(--vermelho-tinta); }
+.seg .valor { text-align: right; font-size: 8.4pt; }
+
+/* ---------- tabela de bairros ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 8.4pt; }
+th {
+  text-align: left; font: 800 6.9pt "Rubik"; text-transform: uppercase; letter-spacing: .06em;
+  color: #fff; background: var(--tinta); padding: 1.8mm 1.6mm 1.5mm; white-space: nowrap;
+}
+th.n, td.n { text-align: right; }
+td { padding: 1.3mm 1.6mm; border-bottom: 1px solid var(--linha); vertical-align: middle; }
+tr { break-inside: avoid; }
+tbody tr:nth-child(even) td { background: rgba(255,255,255,.55); }
+td.bairro { font-weight: 700; white-space: nowrap; }
+td.n { white-space: nowrap; }
+.split { display: flex; height: 3.4mm; width: 30mm; gap: 1px; }
+.split div { height: 100%; }
+.split .l { background: var(--vermelho-tinta); }
+.split .f { background: var(--flavio); }
+.split .o { background: var(--outros); }
+.cat { font: 800 6.8pt "Rubik"; text-transform: uppercase; padding: .8mm 1.6mm .6mm; border-radius: 2px; white-space: nowrap; }
+.cat.base_a_segurar { background: var(--vermelho-tinta); color: #fff; }
+.cat.periferia_conversavel { background: var(--amarelo); color: var(--vermelho); }
+.cat.terreno_de_flavio { background: var(--flavio); color: #fff; }
+.dif-l { color: var(--vermelho-tinta); font-weight: 800; }
+.dif-f { color: var(--flavio); font-weight: 800; }
+.grupos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 4mm; }
+.grupo { background: #fff; padding: 3.4mm; break-inside: avoid; }
+.grupo h4 { font-size: 9pt; text-transform: uppercase; margin-bottom: 1.6mm; }
+.grupo p { font-size: 7.8pt; color: var(--tinta-2); margin-bottom: 1.6mm; }
+.app { display: grid; grid-template-columns: repeat(3, 1fr) 2fr; gap: 3mm; margin-top: 2mm; }
+
+/* ---------- ranking ---------- */
+.ranking-lista { counter-reset: none; }
+.rk { display: grid; grid-template-columns: 11mm 1fr 24mm 18mm 44mm; gap: 3mm; align-items: center; padding: 2mm 0; border-bottom: 1px solid var(--linha); break-inside: avoid; }
+.rk .pos { font: 900 16pt/1 "Rubik"; color: var(--vermelho-tinta); text-align: center; }
+.rk .t { font-weight: 800; font-size: 9.6pt; }
+.rk .t small { display: block; font-weight: 400; color: var(--tinta-2); font-size: 7.6pt; }
+.rk .pub { text-align: right; font: 800 10pt "Rubik"; }
+.rk .pub small { display: block; font: 400 7.2pt "Rubik"; color: var(--tinta-2); }
+.rk .x { text-align: right; font: 900 11pt "Rubik"; color: var(--vermelho-tinta); }
+.rk .trilho { height: 3.4mm; background: var(--papel-2); border-radius: 2px; overflow: hidden; }
+.rk .barra { height: 100%; background: var(--vermelho-tinta); }
+.rk.cabeca { border-bottom: 2px solid var(--tinta); padding-top: 0; }
+.rk.cabeca div { font: 800 6.8pt "Rubik"; text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-2); }
+
+.pauta { margin-top: 8mm; }
+.pauta-topo {
+  display: grid; grid-template-columns: 20mm 1fr; gap: 0;
+  background: var(--vermelho) var(--textura) center / cover; color: #fff;
+  break-inside: avoid; break-after: avoid;
+}
+.pauta-topo .pos { background: var(--amarelo); color: var(--vermelho); font: 900 30pt/1 "Rubik"; display: flex; align-items: center; justify-content: center; }
+.pauta-topo .txt { padding: 3.6mm 5mm 3.2mm; }
+.pauta-topo h3 { color: var(--amarelo); margin: 0; font-size: 16pt; }
+.pauta-topo .meta { font: 500 8.4pt/1.35 "Rubik"; margin-top: 1.4mm; }
+.pauta-topo .meta b { font-weight: 800; }
+.pauta-corpo { background: #fff; padding: 4.4mm 5mm 4.6mm; }
+.pauta-corpo .linha2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; break-inside: avoid; }
+.rotulo { break-after: avoid; font: 800 7pt "Rubik"; text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-2); margin-bottom: .6mm; }
+.frase { font: 900 14pt/1.18 "Rubik"; color: var(--vermelho-tinta); margin: 4mm 0 2mm; break-inside: avoid; }
+.apoio { font: 500 10pt/1.4 "Rubik"; margin-bottom: 3mm; }
+.pauta-corpo ul, .pauta-corpo ol { margin: 1mm 0 3mm; padding-left: 5mm; }
+.pauta-corpo li { margin-bottom: 1.1mm; break-inside: avoid; }
+.pauta-corpo ol li::marker { font-weight: 900; color: var(--vermelho-tinta); }
+.cuidado { border: 2px solid var(--vermelho-tinta); padding: 2.8mm 3.6mm; break-inside: avoid; }
+.cuidado .rotulo { color: var(--vermelho-tinta); }
+.abertura { font: 700 11pt/1.4 "Rubik"; margin: 3.5mm 0 3mm; border-left: 4px solid var(--amarelo); padding-left: 3.5mm; }
+.pontes { display: grid; grid-template-columns: 1fr 1fr; gap: 2.6mm; }
+.ponte { background: var(--papel); padding: 3mm 3.4mm; break-inside: avoid; }
+.ponte h4 { font-size: 9.4pt; line-height: 1.15; margin-bottom: 1.4mm; }
+.ponte p { font-size: 8.4pt; margin: 0 0 1.4mm; }
+.tipo { font: 800 6.6pt "Rubik"; text-transform: uppercase; padding: .6mm 1.4mm .4mm; border-radius: 2px; margin-left: 1mm; vertical-align: 1px; }
+.tipo.igual { background: var(--vermelho-tinta); color: #fff; }
+.tipo.aproximado { background: var(--amarelo); color: var(--vermelho); }
+.sem-material { font-size: 8.6pt; color: var(--tinta-2); margin-top: 3mm; }
+
+/* ---------- temas ---------- */
+.matriz { width: 100%; border-collapse: collapse; font-size: 7.6pt; }
+.matriz th { background: none; color: var(--tinta); padding: 0 .5mm 1.6mm; vertical-align: bottom; height: 30mm; }
+.matriz th.vert div { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font: 800 7pt "Rubik"; text-transform: none; letter-spacing: 0; margin: 0 auto; }
+.matriz td { text-align: center; padding: 1.2mm .5mm; }
+.matriz td.p { text-align: left; font-weight: 700; white-space: nowrap; padding-right: 2mm; }
+.ponto { display: inline-block; width: 3.2mm; height: 3.2mm; border-radius: 50%; background: var(--vermelho-tinta); }
+.vazio { display: inline-block; width: 1.4mm; height: 1.4mm; border-radius: 50%; background: var(--linha); }
+.temas { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-top: 6mm; align-items: start; }
+.tema { break-inside: avoid; background: #fff; }
+.tema .topo { background: var(--vermelho) var(--textura) center / cover; color: #fff; padding: 3mm 3.6mm 2.6mm; display: flex; gap: 3mm; align-items: baseline; }
+.tema .topo .n { font: 900 15pt/1 "Rubik"; color: var(--amarelo); }
+.tema .topo h4 { font-size: 11pt; text-transform: uppercase; line-height: 1.05; }
+.tema .corpo { padding: 3mm 3.6mm 3.4mm; }
+.tema .chamada { font: 500 8.8pt/1.38 "Rubik"; margin-bottom: 2mm; }
+.tema .alcance { font-size: 7.6pt; color: var(--tinta-2); margin-bottom: 2mm; }
+.tema .alcance b { color: var(--tinta); font-weight: 800; }
+.tema ul { list-style: none; padding: 0; margin: 2mm 0 0; font-size: 8.2pt; }
+.tema li { display: flex; justify-content: space-between; gap: 2mm; padding: .9mm 0; border-top: 1px dotted var(--linha); }
+.tema li span { color: var(--tinta-2); white-space: nowrap; font-size: 7.4pt; }
+
+/* ---------- roteiro ---------- */
+.roteiro { counter-reset: r; list-style: none; padding: 0; margin: 0; }
+.roteiro li { counter-increment: r; display: grid; grid-template-columns: 14mm 1fr; gap: 3mm; padding: 3mm 0; border-bottom: 1px solid var(--linha); font: 500 11pt/1.4 "Rubik"; break-inside: avoid; }
+.roteiro li::before { content: counter(r); font: 900 26pt/1 "Rubik"; color: var(--vermelho-tinta); }
+.avisos { background: var(--papel-2); padding: 4mm 5mm; margin-top: 6mm; font-size: 8.4pt; break-inside: avoid; }
+.avisos ul { margin: 1mm 0 0; padding-left: 4.5mm; }
+.fontes { margin-top: 6mm; font-size: 7.6pt; color: var(--tinta-2); }
+.fontes b { color: var(--tinta); }
