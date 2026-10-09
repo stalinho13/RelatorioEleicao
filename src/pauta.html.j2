@@ -8,7 +8,7 @@
   @page { @bottom-left { content: "Pauta de conversas · {{ d.cidade }}/{{ d.uf }} · 2º turno"; } }
 </style>
 </head>
-<body>
+<body class="textura-{{ d.textura or 'paper' }}">
 {% set na = d.numeros_absolutos %}
 {% set pc = d.percentuais %}
 {% set cl = d.classificacao or {} %}
@@ -18,7 +18,7 @@
 <section class="capa">
   <div class="capa-topo">
     <div class="selo">2º turno · dia 25</div>
-    <img class="logo" src="logo-jpt-sem-fundo.svg" alt="JPT Juventude">
+    <img class="logo" src="{{ d.logo_customizado or 'logo-jpt-sem-fundo.svg' }}" alt="Logotipo da pauta">
   </div>
   <div class="titulo">Pauta de<br>conversas</div>
   <div class="cidade">{{ d.cidade }}<small>{{ d.uf }}</small></div>
@@ -35,6 +35,16 @@
     Fonte: Onde dá pra conversar (ondedapraconversar.com.br), a partir dos boletins de urna do TSE.
   </div>
 </section>
+
+{% if d.conteudo_adicional %}
+<section class="secao briefing">
+  <div class="faixa">
+    <div class="kicker">Briefing · orientação da equipe</div>
+    <h2>Notas para esta pauta</h2>
+  </div>
+  <div class="bloco conteudo-adicional">{{ d.conteudo_adicional }}</div>
+</section>
+{% endif %}
 
 {# =================== 1. PLACAR =================== #}
 <section class="secao">

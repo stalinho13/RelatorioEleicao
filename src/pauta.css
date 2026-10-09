@@ -59,6 +59,8 @@ body {
   font: 400 9.6pt/1.42 "Rubik", sans-serif;
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
+body.textura-none { --textura: none; }
+.conteudo-adicional { white-space: pre-wrap; font-size: 12pt; line-height: 1.65; }
 h1, h2, h3, h4 { margin: 0; font-weight: 900; line-height: .95; }
 p { margin: 0 0 .5em; }
 .num { font-variant-numeric: tabular-nums; }

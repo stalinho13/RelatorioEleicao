@@ -1,4 +1,4 @@
-import { ChangeEvent, DragEvent, ReactNode, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, ReactNode, useEffect, useRef, useState } from "react";
 
 type IconName =
   | "document"
@@ -13,6 +13,7 @@ type IconName =
   | "sparkles"
   | "file"
   | "check"
+  | "download"
   | "building";
 
 type Texture = "none" | "paper" | "red";
@@ -72,6 +73,12 @@ function Icon({ name, className = "size-5" }: { name: IconName; className?: stri
       </>
     ),
     check: <path d="m5 12 4 4L19 6" />,
+    download: (
+      <>
+        <path d="M12 3v12M7 10l5 5 5-5" />
+        <path d="M5 19h14" />
+      </>
+    ),
     building: (
       <>
         <path d="M4 21h16M6 21V8l6-4 6 4v13M9 11h2M13 11h2M9 15h2M13 15h2" />
@@ -218,15 +225,35 @@ export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [rendered, setRendered] = useState(false);
+  const [generationState, setGenerationState] = useState<
+    "idle" | "generating" | "success" | "error"
+  >("idle");
+  const [generationMessage, setGenerationMessage] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (logoUrl) URL.revokeObjectURL(logoUrl);
+    };
+  }, [logoUrl]);
 
   function receiveFile(selected?: File) {
     if (!selected) return;
-    setFile(selected);
-    if (selected.type.startsWith("image/")) {
-      setLogoUrl(URL.createObjectURL(selected));
+    if (!["image/svg+xml", "image/png"].includes(selected.type)) {
+      setGenerationState("error");
+      setGenerationMessage("Selecione um logotipo SVG ou PNG.");
+      return;
     }
+    if (selected.size > 5 * 1024 * 1024) {
+      setGenerationState("error");
+      setGenerationMessage("O logotipo deve ter no máximo 5 MB.");
+      return;
+    }
+    if (logoUrl) URL.revokeObjectURL(logoUrl);
+    setFile(selected);
+    setLogoUrl(URL.createObjectURL(selected));
+    setGenerationState("idle");
+    setGenerationMessage("");
   }
 
   function handleDrop(event: DragEvent<HTMLDivElement>) {
@@ -235,9 +262,70 @@ export default function App() {
     receiveFile(event.dataTransfer.files[0]);
   }
 
-  function renderPdf() {
-    setRendered(true);
-    window.setTimeout(() => setRendered(false), 2400);
+  async function renderPdf() {
+    if (!city.trim()) {
+      setGenerationState("error");
+      setGenerationMessage('Informe a cidade e a UF, por exemplo: "Pelotas, RS".');
+      return;
+    }
+
+    const form = new FormData();
+    form.append("city", city.trim());
+    form.append("content", content.trim());
+    form.append("texture", texture);
+    if (file) form.append("logo", file);
+
+    setGenerationState("generating");
+    setGenerationMessage(
+      "Consultando os dados eleitorais e diagramando o documento. Isso pode levar alguns minutos.",
+    );
+
+    try {
+      const apiBase = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+      const response = await fetch(`${apiBase}/api/pautas`, {
+        method: "POST",
+        body: form,
+      });
+
+      if (!response.ok) {
+        let message = "Não foi possível gerar o PDF.";
+        try {
+          const payload = (await response.json()) as { detail?: string };
+          if (payload.detail) message = payload.detail;
+        } catch {
+          // A API pode estar indisponível e devolver uma resposta sem JSON.
+        }
+        throw new Error(message);
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const disposition = response.headers.get("content-disposition") || "";
+      const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+      const fallbackName = `${city
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")}-pauta.pdf`;
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = encodedName ? decodeURIComponent(encodedName) : fallbackName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+
+      setGenerationState("success");
+      setGenerationMessage("PDF gerado e baixado com sucesso.");
+    } catch (error) {
+      setGenerationState("error");
+      setGenerationMessage(
+        error instanceof Error
+          ? error.message
+          : "Ocorreu um erro inesperado durante a geração.",
+      );
+    }
   }
 
   const previewTitle = city.trim() || "Nome da Cidade";
@@ -311,25 +399,30 @@ export default function App() {
                       className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-slate-400 transition group-focus-within:text-red-500"
                     />
                     <input
+                      aria-describedby="city-hint"
                       className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-12 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-red-400 focus:bg-white focus:ring-4 focus:ring-red-50"
                       onChange={(event) => setCity(event.target.value)}
-                      placeholder="Ex.: São José dos Campos"
+                      placeholder="Ex.: São José dos Campos, SP"
                       value={city}
                     />
                   </div>
+                  <span id="city-hint" className="mt-2 block text-xs text-slate-400">
+                    Inclua a sigla do estado para localizar os dados corretos.
+                  </span>
                 </label>
 
                 <label className="block">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm font-semibold text-slate-700">
-                      Conteúdo da pauta <span className="text-red-500">*</span>
+                      Conteúdo da pauta{" "}
+                      <span className="font-normal text-slate-400">(opcional)</span>
                     </span>
                     <span className="text-xs text-slate-400">{content.length} caracteres</span>
                   </div>
                   <textarea
                     className="min-h-44 w-full resize-y rounded-xl border border-slate-200 bg-slate-50/60 p-4 text-sm leading-relaxed text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-red-400 focus:bg-white focus:ring-4 focus:ring-red-50"
                     onChange={(event) => setContent(event.target.value)}
-                    placeholder="Escreva ou cole aqui o conteúdo que será usado na pauta..."
+                    placeholder="Opcional: escreva orientações e observações que devem aparecer no briefing..."
                     value={content}
                   />
                 </label>
@@ -432,13 +525,40 @@ export default function App() {
                 </fieldset>
 
                 <button
-                  className="group flex h-14 w-full items-center justify-center gap-2.5 rounded-xl bg-red-600 px-6 text-sm font-bold text-white shadow-lg shadow-red-600/20 transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl hover:shadow-red-600/25 active:translate-y-0"
+                  className="group flex h-14 w-full items-center justify-center gap-2.5 rounded-xl bg-red-600 px-6 text-sm font-bold text-white shadow-lg shadow-red-600/20 transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl hover:shadow-red-600/25 active:translate-y-0 disabled:cursor-wait disabled:translate-y-0 disabled:bg-red-400 disabled:shadow-none"
+                  disabled={generationState === "generating"}
                   onClick={renderPdf}
+                  type="button"
                 >
-                  <Icon name="sparkles" className="size-5 transition group-hover:rotate-6" />
-                  {rendered ? "PDF enviado para renderização" : "Renderizar Pauta (PDF)"}
-                  {rendered && <Icon name="check" className="size-4" />}
+                  {generationState === "generating" ? (
+                    <span className="size-5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  ) : (
+                    <Icon
+                      name={generationState === "success" ? "download" : "sparkles"}
+                      className="size-5 transition group-hover:rotate-6"
+                    />
+                  )}
+                  {generationState === "generating"
+                    ? "Gerando pauta..."
+                    : generationState === "success"
+                      ? "Gerar e baixar novamente"
+                      : "Gerar e baixar PDF"}
                 </button>
+                {generationMessage && (
+                  <div
+                    aria-live="polite"
+                    className={`rounded-xl border px-4 py-3 text-xs leading-relaxed ${
+                      generationState === "error"
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : generationState === "success"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-slate-200 bg-slate-50 text-slate-600"
+                    }`}
+                    role={generationState === "error" ? "alert" : "status"}
+                  >
+                    {generationMessage}
+                  </div>
+                )}
               </div>
             </section>
 

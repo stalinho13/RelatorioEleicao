@@ -23,7 +23,7 @@ import tempfile
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, ChainableUndefined
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES = os.path.join(AQUI, "templates")
+TEMPLATES = AQUI
 
 SEGMENTOS = {
     "18-24": "18 a 24 anos", "25-34": "25 a 34 anos", "35-44": "35 a 44 anos",
@@ -153,7 +153,9 @@ def gerar_pdf(html_path, pdf_path):
     from playwright.sync_api import sync_playwright
     with sync_playwright() as pw:
         exe = os.environ.get("CHROMIUM_PATH")
-        nav = pw.chromium.launch(executable_path=exe) if exe else pw.chromium.launch()
+        argumentos = ["--no-sandbox", "--disable-dev-shm-usage"]
+        nav = (pw.chromium.launch(executable_path=exe, args=argumentos)
+               if exe else pw.chromium.launch(args=argumentos))
         pg = nav.new_page()
         pg.goto("file://" + html_path, wait_until="networkidle")
         pg.evaluate("document.fonts.ready")
@@ -181,7 +183,8 @@ def main():
         html_tmp = tmp.name
     try:
         gerar_pdf(html_tmp, saida)
-        aplicar_papel(saida)
+        if dados.get("textura", "paper") == "paper":
+            aplicar_papel(saida)
         if args.html:
             destino = os.path.splitext(saida)[0] + ".html"
             shutil.copy(html_tmp, destino)
